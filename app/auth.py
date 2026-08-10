@@ -15,21 +15,23 @@ from __future__ import annotations
 
 import secrets
 
-from fastapi import Header, HTTPException, status
+from fastapi import Header, HTTPException, Security, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from .config import get_settings
 
 ANONYMOUS_CLIENT = "anonymous"
 SCHEME = "Bearer"
+bearer_scheme = HTTPBearer(auto_error=False)
 
 
 def verify_bearer_token(
-    authorization: str | None = Header(default=None),
+    credentials: HTTPAuthorizationCredentials | None = Security(bearer_scheme),
     x_client_id: str | None = Header(default=None),
 ) -> str:
     """Kiểm tra header ``Authorization``; trả về client_id nếu hợp lệ.
 
-    TODO (CP3):
+    Quy trình xác thực:
       1. Thiếu header ``authorization`` → 401.
       2. Tách header thành 2 phần: ``scheme, _, token = authorization.partition(" ")``.
          Sai scheme (không phải ``Bearer``, so sánh không phân biệt hoa thường)
@@ -56,4 +58,23 @@ def verify_bearer_token(
          ``ANONYMOUS_CLIENT``. client_id này là đơn vị để rate limit và tính
          chi phí.
     """
-    raise NotImplementedError("TODO (CP3): cài đặt verify_bearer_token")
+    def unauthorized() -> None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="invalid or missing bearer token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if not credentials:
+        unauthorized()
+
+    token = credentials.credentials
+    if credentials.scheme.lower() != SCHEME.lower() or not token:
+        unauthorized()
+
+    if not secrets.compare_digest(token, get_settings().api_token):
+        unauthorized()
+
+    if isinstance(x_client_id, str) and x_client_id:
+        return x_client_id
+    return ANONYMOUS_CLIENT
