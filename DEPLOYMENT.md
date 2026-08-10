@@ -10,17 +10,17 @@
 
 | Mục | Nội dung |
 |-----|----------|
-| Họ và tên | (điền họ tên) |
-| Mã học viên | (điền mã học viên) |
-| Repo | (điền link repo K4-DAY12-...) |
+| Họ và tên | Lê Hồ Quang Huy |
+| Mã học viên | 2A202602026 |
+| Repo | https://github.com/huyle0112/K4-Day12-2A202602026-LeHoQuangHuy |
 
 ## Service
 
 | Mục | Nội dung |
 |-----|----------|
-| Public URL | https://thay-bang-url-that.up.railway.app |
-| Platform | Railway / Render / Cloud Run — (điền platform bạn dùng) |
-| Ngày deploy | (điền ngày) |
+| Public URL | https://close-ai-chat.onrender.com |
+| Platform | Render |
+| Ngày deploy | 10/08/2026 |
 
 ## Biến Môi Trường Đã Set Trên Cloud
 
@@ -30,7 +30,7 @@ Ghi tên biến và **nguồn giá trị**, không ghi giá trị:
 |------|--------|---------|
 | `PORT` | ✅ | platform tự gán |
 | `API_TOKEN` | ✅ | đặt trong dashboard, không nằm trong repo |
-| `REDIS_URL` | ✅ | (điền: Redis add-on của platform / Upstash / ...) |
+| `REDIS_URL` | ✅ | new key value database từ render |
 | `BUCKET_CAPACITY` | ✅ | 10 |
 | `REFILL_PER_MINUTE` | ✅ | 10 |
 | `DAILY_BUDGET_USD` | ✅ | 1.0 |
@@ -74,7 +74,104 @@ done; echo
 Dán output của các lệnh trên vào đây:
 
 ```
-(điền output)
+curl -i https://close-ai-chat.onrender.com/healthz
+
+HTTP/1.1 200 OK
+Date: Mon, 10 Aug 2026 09:52:54 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Connection: keep-alive
+rndr-id: d0433d12-fa43-4341
+Server: cloudflare
+vary: Accept-Encoding
+x-render-origin-server: uvicorn
+cf-cache-status: DYNAMIC
+CF-RAY: a28e1c433bc8ce67-SIN
+alt-svc: h3=":443"; ma=86400
+
+{"status":"ok","service":"day12-chat-service","version":"1.0.0"}
+
+curl -i https://close-ai-chat.onrender.com/readyz
+
+HTTP/1.1 200 OK
+Date: Mon, 10 Aug 2026 09:53:53 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Connection: keep-alive
+cf-cache-status: DYNAMIC
+rndr-id: 9e26a627-a36c-42be
+Server: cloudflare
+vary: Accept-Encoding
+x-render-origin-server: uvicorn
+CF-RAY: a28e1db2c9368567-HKG
+alt-svc: h3=":443"; ma=86400
+
+{"status":"ready","redis":true}
+
+curl -i -X POST https://close-ai-chat.onrender.com/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message":"Hello"}'
+
+HTTP/1.1 401 Unauthorized
+Date: Mon, 10 Aug 2026 09:56:47 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Connection: keep-alive
+rndr-id: a722aa17-60ab-483d
+Server: cloudflare
+vary: Accept-Encoding
+www-authenticate: Bearer
+x-render-origin-server: uvicorn
+cf-cache-status: DYNAMIC
+CF-RAY: a28e21f63b54fd67-SIN
+alt-svc: h3=":443"; ma=86400
+
+{"detail":"invalid or missing bearer token"}
+
+curl -i -X POST https://close-ai-chat.onrender.com/chat \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $API_TOKEN" \
+  -H "X-Client-Id: sv-test" \
+  -d '{"message":"Deploy là gì?"}'
+
+HTTP/1.1 200 OK
+Date: Mon, 10 Aug 2026 09:58:16 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Connection: keep-alive
+rndr-id: bc32b24f-fe46-450b
+Server: cloudflare
+vary: Accept-Encoding
+x-render-origin-server: uvicorn
+cf-cache-status: DYNAMIC
+CF-RAY: a28e240fab21dd8c-HKG
+alt-svc: h3=":443"; ma=86400
+
+{"reply":"Câu hỏi hay. Deploy là gì thường được giải quyết bằng cách chuẩn hóa môi trường chạy: cùng một image chạy giống nhau ở laptop và trên cloud.","client_id":"sv-test","turns_before":0,"usd_cost":2.145e-05,"usage":{"prompt":3,"completion":35}}
+
+for i in $(seq 1 15); do
+  curl -s -o /dev/null -w "%{http_code} " -X POST https://close-ai-chat.onrender.com/chat \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $API_TOKEN" \
+    -H "X-Client-Id: sv-test" \
+    -d '{"message":"test"}'
+done; echo
+
+200
+200
+200
+200
+200
+200
+200
+200
+200
+200
+200
+429
+200
+429
+429
 ```
 
 ## Ảnh Chụp Màn Hình
@@ -86,17 +183,3 @@ Dán output của các lệnh trên vào đây:
 
 ---
 
-## Nếu Dùng Phương Án Dự Phòng
-
-Không đăng ký được tài khoản cloud? Vẫn nộp được bài, nhưng CP5 tối đa 60% điểm:
-
-1. Đặt `LOCAL_FALLBACK=true` trong `.env`
-2. Chạy `docker compose up -d` rồi kiểm tra `docker compose ps`
-3. Chụp màn hình vào `screenshots/`
-4. Chạy `pytest tests/test_cp5.py -v` — bộ test sẽ tự chuyển sang kiểm tra
-   `http://localhost:8000`
-5. Ghi rõ lý do không deploy được vào phần dưới đây:
-
-```
-(điền lý do nếu dùng phương án dự phòng, ngược lại xóa mục này)
-```
