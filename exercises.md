@@ -26,25 +26,23 @@ Chạy service và gọi `/chat` vài lần. Dán một dòng log JSON bạn thu
 nêu **hai** việc bạn làm được với dòng log đó mà `print("đã trả lời xong")`
 không làm được.
 
-> 
-HTTP/1.1 401 Unauthorized
-Date: Mon, 10 Aug 2026 10:21:32 GMT
-Content-Type: application/json
-Transfer-Encoding: chunked
-Connection: keep-alive
-rndr-id: 5992a498-448b-444e
-Server: cloudflare
-vary: Accept-Encoding
-www-authenticate: Bearer
-x-render-origin-server: uvicorn
-cf-cache-status: DYNAMIC
-CF-RAY: a28e46365e63cdee-SIN
-alt-svc: h3=":443"; ma=86400
+> HTTP/1.1 401 Unauthorized
+>Date: Mon, 10 Aug 2026 10:21:32 GMT
+>Content-Type: application/json
+>Transfer-Encoding: chunked
+>Connection: keep-alive
+>rndr-id: 5992a498-448b-444e
+>Server: cloudflare
+>vary: Accept-Encoding
+>www-authenticate: Bearer
+>x-render-origin-server: uvicorn
+>cf-cache-status: DYNAMIC
+>CF-RAY: a28e46365e63cdee-SIN
+>alt-svc: h3=":443"; ma=86400
 
-{"detail":"invalid or missing bearer token"}
+>{"detail":"invalid or missing bearer token"}
 
-Trong log trả về có thể biết request đang lỗi gì, thông qua mã lỗi, details lỗi
-Có thể biết được server bị lỗi nếu có mã lỗi 500, server thực hiện load balance: cloudflare
+>Trong log trả về có thể biết request đang lỗi gì, thông qua mã lỗi, details lỗi có thể biết được server bị lỗi nếu có mã lỗi 500, server thực hiện load balance: cloudflare
 
 ---
 
